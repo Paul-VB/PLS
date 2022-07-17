@@ -1,5 +1,5 @@
 # Pauls-Launch-Script
-a collection of kOS scripts to automate launching a rocket in Kerbal Space Program
+A collection of kOS scripts to automate launching a rocket in Kerbal Space Program
 
 ## How to use this?
 
