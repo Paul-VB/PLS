@@ -5,23 +5,23 @@ clearScreen.
 // #include "orbitTools.ks"
 // #include "ApoLaunchPitchProgram.ks"
 // #include "azCalc.ks"
+// #include "gui/parkingOrbit.ks"
 runOncePath("PLS/init.ks").
 
-//parameters
-parameter targetOrbit is target:orbit.
 
-Main(targetOrbit).
+Main().
+
 
 function Main{
-	parameter targetOrbit.
-
 	//next, lets grab our launch co-oridinates as we will need them later.
 	declare local LaunchPosition to ship:geoposition.
 	//and grab the launch altitude. we will need this later
 	declare local LaunchAltitude to ship:altitude.
 
-	//lets define our parking orbit. we'll need this incase our target orbit's inclination is below our launch lattitude.
-	declare local parkingOrbit to calculateParkingOrbit(targetOrbit,LaunchPosition).
+	//first, ask the user to enter stats for the parking orbit.
+	declare local parkingOrbit to promptUserForParkingOrbit().
+	//lets redefine our parking orbit to an orbit we can actually physically reach. we'll need this incase our target orbit's inclination is below our launch lattitude.
+	set parkingOrbit to calculateParkingOrbit(parkingOrbit,LaunchPosition).
 
 	//next, lets declare the target velocity we want be at when we match our orbital plane with the target plane.
 	//Its basically how fast we should be going once we've killed our normal velocity

@@ -8,3 +8,5 @@ runOncePath(basePath+"orbitTools.ks").
 runOncePath(basePath+"navigationDegreeTools.ks").
 runOncePath(basePath+"azCalc.ks").
 runOncePath(basePath+"ApoLaunchPitchProgram.ks",(10)).
+runOncePath(basePath+"gui/parkingOrbit.ks").
+runOncePath(basePath+"gui/guiSkin.ks").
