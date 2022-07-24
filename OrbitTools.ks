@@ -75,6 +75,16 @@ function isOrbitPrograde{
 	return theOrbit:inclination <= 90.
 }
 
+//calculate the instantaneous speed we need to raise our apoapsis to a target altitude using the vis-viva equasion
+//this function takes into account our current (sub)orbital parameters
+function calculateSpeedRequiredForApoapsis{
+	parameter targetApoapsis.
+	declare local sma to (ship:orbit:periapsis + targetApoapsis )/2 + ship:body:radius.
+	declare local distanceToCenterOfBody to ship:altitude + ship:body:radius.
+	declare local requiredSpeed to sqrt(ship:body:mu * ((2/distanceToCenterOfBody)-(1/sma))).
+	return requiredSpeed.
+}
+
 //calculates what compass heading the prograde vector is for a ship at any given point in an orbit (or suborbital flight) - correct
 // function calculateProgradeCompassHeading_old{
 // 	parameter targetOrbit,shipPosition.

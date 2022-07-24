@@ -25,7 +25,7 @@ function Main{
 
 	//next, lets declare the target velocity we want be at when we match our orbital plane with the target plane.
 	//Its basically how fast we should be going once we've killed our normal velocity
-	declare local planeMatchVelocity to getOrbitalVelocityOfCircularOrbit(parkingOrbit).
+	declare local planeMatchVelocity to calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis).
 
 	//next, find out how long it will take to acheve plane match. 
 	//Basically how long after launch will our orbital plane be lined up with the target orbital plane
@@ -101,7 +101,7 @@ function Main{
 			} else {
 				//we know we should be steering. Next check if we currently *are* steering
 				if (not steeringManager:enabled){
-					lock steering to heading(calculateThrustHeading(parkingOrbit,planeMatchVelocity),calculateCurrentRequiredPitchAngle(parkingOrbit)).
+					lock steering to heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).
 
 				}
 			}
