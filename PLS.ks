@@ -27,7 +27,7 @@ function Main{
 	//Its basically how fast we should be going once we've killed our normal velocity
 	declare local planeMatchVelocity to calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis).
 
-	//next, find out how long it will take to acheve plane match. 
+	//next, find out how long it will take to acheve plane match velocity. 
 	//Basically how long after launch will our orbital plane be lined up with the target orbital plane
 	//if there will be no coast phase before we match planes, then this can be calculated right from planeMatchVelocity with the ideal rocket equasion
 	declare local planeMatchTime to 120.
