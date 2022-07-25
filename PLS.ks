@@ -6,6 +6,7 @@ clearScreen.
 // #include "ApoLaunchPitchProgram.ks"
 // #include "azCalc.ks"
 // #include "gui/parkingOrbit.ks"
+// #include "engineBurnTimeCalc.ks"
 runOncePath("PLS/init.ks").
 
 
@@ -30,8 +31,12 @@ function Main{
 	//next, find out how long it will take to acheve plane match velocity. 
 	//Basically how long after launch will our orbital plane be lined up with the target orbital plane
 	//if there will be no coast phase before we match planes, then this can be calculated right from planeMatchVelocity with the ideal rocket equasion
-	declare local planeMatchTime to 120.
+	declare local planeMatchTime to calculateEngineBurnTime(planeMatchVelocity).
 	declare local planeMatchTimeStamp to timestamp() + timespan(planeMatchTime).
+
+	//todo: get rid of this
+	print("we're trying to accelerate to a planeMatchVelocity of: "+round(planeMatchVelocity,3)+"m/s").
+	print("We need to launch "+round(planeMatchTime,3)+" seconds before we pass right under the parking orbit's plane").
 
 
 	//next, lets get the height of the launch tower (the tallest launch clamp)
