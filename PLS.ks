@@ -39,9 +39,9 @@ function Main{
 
 	//now we wait until we have launched.
 	print("waiting for liftoff...").
-	// until (isShipLanded()){
-	// 	//wait for it....
-	// }
+	until (isShipLanded()){
+		//wait for it....
+	}
 	print("Liftoff!").
 	//launch phase 0: things that must happen immediatly upon launch
 	{
