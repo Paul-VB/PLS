@@ -31,6 +31,8 @@ function Main{
 	//next, find out how long it will take to acheve plane match velocity. 
 	//Basically how long after launch will our orbital plane be lined up with the target orbital plane
 	//if there will be no coast phase before we match planes, then this can be calculated right from planeMatchVelocity with the ideal rocket equasion
+
+	//todo: this should use the difference between our starting velocity and planeMatchVelocity
 	declare local planeMatchTime to calculateEngineBurnTime(planeMatchVelocity).
 	declare local planeMatchTimeStamp to timestamp() + timespan(planeMatchTime).
 
