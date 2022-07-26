@@ -4,12 +4,12 @@
 declare local basePath to "0:/PLS/".
 
 //import statements
-runOncePath(basePath+"orbitTools.ks").
-runOncePath(basePath+"navigationDegreeTools.ks").
+runOncePath(basePath+"utils/orbitTools.ks").
+runOncePath(basePath+"utils/navigationDegreeTools.ks").
 runOncePath(basePath+"azCalc.ks").
 runOncePath(basePath+"ApoLaunchPitchProgram.ks",(10)).
 runOncePath(basePath+"engineBurnTimeCalc.ks").
-runOncePath(basePath+"autoStage.ks").
+runOncePath(basePath+"utils/autoStage.ks").
 runOncePath(basePath+"gui/parkingOrbit.ks").
 runOncePath(basePath+"gui/guiSkin.ks").
 runOncePath(basePath+"utils/extraMath.ks").

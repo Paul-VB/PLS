@@ -1,7 +1,7 @@
 @lazyGlobal off.
 
 // #include "guiSkin.ks"
-// #include "../navigationDegreeTools.ks"
+// #include "../utils/navigationDegreeTools.ks"
 
 //the numeric backing variables
 declare local orbitAltitude to 0.

@@ -2,12 +2,12 @@
 clearScreen.
 
 //"import" statements
-// #include "orbitTools.ks"
+// #include "utils/orbitTools.ks"
 // #include "ApoLaunchPitchProgram.ks"
 // #include "azCalc.ks"
 // #include "gui/parkingOrbit.ks"
 // #include "engineBurnTimeCalc.ks"
-// #include "autoStage.ks"
+// #include "utils/autoStage.ks"
 runOncePath("PLS/init.ks").
 
 

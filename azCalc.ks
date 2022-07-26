@@ -1,8 +1,8 @@
 @lazyGlobal off.
 
 //import statements
-// #include "orbitTools.ks"
-// #include "navigationDegreeTools.ks"
+// #include "utils/orbitTools.ks"
+// #include "utils/navigationDegreeTools.ks"
 // #include "utils/extraMath.ks"
 
 //Given a target orbit's inclination and a target velocity, calculate the required heading we must fire the engines at in order to 
