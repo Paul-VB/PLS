@@ -2,6 +2,7 @@
 
 //import statmeents
 // #include "navigationDegreeTools.ks"
+// #include "extraMath.ks"
 
 //given a target orbit and a launch location, give me the best-possible initial parking orbit achievable
 function calculateParkingOrbit{
@@ -83,6 +84,51 @@ function calculateSpeedRequiredForApoapsis{
 	declare local distanceToCenterOfBody to ship:altitude + ship:body:radius.
 	declare local requiredSpeed to sqrt(ship:body:mu * ((2/distanceToCenterOfBody)-(1/sma))).
 	return requiredSpeed.
+}
+
+
+//how far east or west is the ship from intersecting a target orbital plane
+//this is given in longitudinal degrees. 
+//positive (+) values represent east
+//negative (-) values represent west
+function longitudinalDistanceFromTargetOrbitalPlane{
+	parameter targetOrbit.
+	return signedLongitudinalDifference(longitudinalOffsetFromLocalLanISWITP(targetOrbit),ship:geoposition:lng).
+}
+
+//given a target orbital plane, pretend the ship is in that plane (even if it's not).
+//at the ship's current actual latitude, how far east or west would the ship be from that target orbit's local LAN?
+//since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
+function longitudinalOffsetFromLocalLanISWITP{
+	parameter targetOrbit.
+
+	//first lets grab our ship's current position
+	declare local shipPos to ship:geoposition.
+
+	//next, grab the target orbit's local LAN
+	declare local targetLocalTrigLan to getLocalTrigLanOfOrbit(targetOrbit).
+
+	//determine if we are closer to the ascending or decending node of the target orbit
+	declare local closerToDecendingNode to abs(signedLongitudinalDifference(ship:geoposition:lng,targetLocalTrigLan)) > 90.
+
+	//next, find the inclination of the nearest node, either ascending or decending
+	declare local nearestNodeInclination to targetOrbit:inclination.
+	if closerToDecendingNode{
+		set nearestNodeInclination to nearestNodeInclination *-1.
+	}
+
+	//if the ship *was* in the target orbital plane (ISWITP), what would our longitudinal distance to the nearest node (either ascending or decending) be at our current latitude?
+	//since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
+	declare local longitudinalOffsetFromNearestNodeISWITP to arcSin(clamp(tan(shipPos:lat)/tan(nearestNodeInclination),-1,1)).
+
+	//now that we know the distance to the nearest node, we can compute the distance to the ascending node.
+	//if the nearrest node IS the ascending node... then we did it.
+	declare local longitudinalOffsetFromLocalLanISWITP to longitudinalOffsetFromNearestNodeISWITP.
+	if closerToDecendingNode{
+		//if we're closer to the decending node, we need to flip it
+		set longitudinalOffsetFromLocalLanISWITP to convertAngleToNavScale(addDegrees(longitudinalOffsetFromLocalLanISWITP,180)).
+	}
+	return longitudinalOffsetFromLocalLanISWITP.
 }
 
 //calculates what compass heading the prograde vector is for a ship at any given point in an orbit (or suborbital flight) - correct
