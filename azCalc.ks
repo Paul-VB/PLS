@@ -43,8 +43,8 @@ function calculateThrustHeading{
 				set longitudinalOffsetFromLocalTrigLanISWITP to convertAngleToNavScale(addDegrees(longitudinalOffsetFromLocalTrigLanISWITP,180)).
 				//set longitudinalOffsetFromLocalTrigLanISWITP to mod(longitudinalOffsetFromLocalTrigLanISWITP + 180,180).
 			}
-			set targetHeading to calculateProgradeCompassHeading(longitudinalOffsetFromLocalTrigLanISWITP,ship:geoposition:lat).
 		}
+		set targetHeading to calculateProgradeCompassHeading(longitudinalOffsetFromLocalTrigLanISWITP,ship:geoposition:lat).
 	}
 	//calculate the heading of the current vector
 	declare local currentHeading to 0.
