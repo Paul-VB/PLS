@@ -12,8 +12,8 @@ function getOppositeSign1{
 	}
 }
 
-//clamp a value between a min and a max
+//clamp a value between a minimum and a maximum
 function clamp{
-	parameter value, min, max.
-	return min(max,(max(min,value))).
+	parameter value, minimum, maximum.
+	return min(maximum,(max(minimum,value))).
 }
