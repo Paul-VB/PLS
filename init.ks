@@ -12,3 +12,4 @@ runOncePath(basePath+"engineBurnTimeCalc.ks").
 runOncePath(basePath+"autoStage.ks").
 runOncePath(basePath+"gui/parkingOrbit.ks").
 runOncePath(basePath+"gui/guiSkin.ks").
+runOncePath(basePath+"utils/extraMath.ks").
