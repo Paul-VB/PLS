@@ -96,8 +96,10 @@ function longitudinalDistanceFromTargetOrbitalPlane{
 	return signedLongitudinalDifference(longitudinalOffsetFromLocalLanISWITP(targetOrbit),ship:geoposition:lng).
 }
 
-//given a target orbital plane, pretend the ship is in that plane (even if it's not).
-//at the ship's current actual latitude, how far east or west would the ship be from that target orbit's local LAN?
+//Given a target orbital plane, pretend the ship is dragged east or west such that it intersects that orbital plane.
+//The ship's latitude stays the same. Only the longitude is changed.
+//At the ship's new imaginary location, how far east or west would the ship be from that target orbit's local LAN?
+//The local LAN of an orbit is the longitude where the orbit's plane intersects it's parent planet's equator. this constantly changes as the parent planet rotates
 //since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
 function longitudinalOffsetFromLocalLanISWITP{
 	parameter targetOrbit.
