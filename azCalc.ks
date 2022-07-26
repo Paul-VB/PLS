@@ -31,10 +31,8 @@ function calculateThrustHeading{
 					set nearestNodeInclination to nearestNodeInclination *-1.
 				}
 				//making an intermediate variable here to diagnose/prevent NaN errors
-				declare local tanLatOverTanNNI to tan(ship:geoposition:lat)/tan(nearestNodeInclination).
-				if abs(tanLatOverTanNNI > 1){
-					print("uh-oh, tanLatOverTanNNI = "+tanLatOverTanNNI+". Lat: "+round(ship:geoposition:lat,3)+". nni: "+round(nearestNodeInclination,3)).
-				}				
+				declare local tanLatOverTanNNI to tan(ship:geoposition:lat)/tan(nearestNodeInclination).	
+				set tanLatOverTanNNI to clamp(tanLatOverTanNNI,-1,1).	
 				set longitudinalOffsetFromNearestNodeISWITP to arcSin(tanLatOverTanNNI).	
 			}
 			//now that we know the distance to the nearest node, we can compute the distance to the ascending node.

@@ -15,8 +15,5 @@ function getOppositeSign1{
 //clamp a value between a min and a max
 function clamp{
 	parameter value, min, max.
-	if (min > value or value > max){
-		print ("Clamping value: "+value).
-	}
 	return min(max,(max(min,value))).
 }
