@@ -52,7 +52,6 @@ function setAltitude{
 function setInclination{
 	parameter value.
 	set inclination to value.
-	set inclination to mod(inclination+360,360).
 	return inclination.
 }
 
