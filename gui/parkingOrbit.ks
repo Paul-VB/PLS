@@ -1,6 +1,7 @@
 @lazyGlobal off.
 
 // #include "guiSkin.ks"
+// #include "../navigationDegreeTools.ks"
 
 //the numeric backing variables
 declare local orbitAltitude to 0.
@@ -52,6 +53,10 @@ function setAltitude{
 function setInclination{
 	parameter value.
 	set inclination to value.
+	set inclination to clampAngleBetween0and360(inclination).
+	if inclination>180{
+		set inclination to inclination -180.
+	}
 	return inclination.
 }
 
