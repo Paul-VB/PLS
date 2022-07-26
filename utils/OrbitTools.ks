@@ -101,7 +101,7 @@ function longitudinalDistanceFromTargetOrbitalPlane{
 //At the ship's new imaginary location, how far east or west would the ship be from that target orbit's local LAN?
 //The local LAN of an orbit is the longitude where the orbit's plane intersects it's parent planet's equator. this constantly changes as the parent planet rotates
 //since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
-function longitudinalOffsetFromLocalLanISWITP{
+function getLongitudinalOffsetFromLocalLanISWITP{
 	parameter targetOrbit.
 
 	//first lets grab our ship's current position
