@@ -7,6 +7,7 @@ clearScreen.
 // #include "azCalc.ks"
 // #include "gui/parkingOrbit.ks"
 // #include "engineBurnTimeCalc.ks"
+// #include "autoStage.ks"
 runOncePath("PLS/init.ks").
 
 
@@ -14,7 +15,7 @@ Main().
 
 
 function Main{
-	//next, lets grab our launch co-oridinates as we will need them later.
+	//next, lets grab our launch co-ordinates as we will need them later.
 	declare local LaunchPosition to ship:geoposition.
 	//and grab the launch altitude. we will need this later
 	declare local LaunchAltitude to ship:altitude.
@@ -50,7 +51,7 @@ function Main{
 		//wait for it....
 	}
 	print("Liftoff!").
-	//launch phase 0: things that must happen immediatly upon launch
+	//launch phase 0: things that must happen immediately upon launch
 	{
 		//turn SAS off. There is a known bug in KOS with SAS and cooked controls
 		SAS off.
@@ -99,6 +100,8 @@ function Main{
 		unlock steering.
 		//keep firing until our current apoapsis meets our target
 		until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
+			//check staging
+			autoStage().
 			//check if steering should be unlocked
 			if (SAS or isPlayerTryingToSteer()){
 				//the player can turn on SAS at any time to disengage the autopilot
@@ -163,6 +166,7 @@ function getLaunchTowerMaxHeight{
 	}
 	return maxLaunchClampHeight.
 }
+
 
 
 
