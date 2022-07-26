@@ -3,6 +3,7 @@
 //import statements
 // #include "orbitTools.ks"
 // #include "navigationDegreeTools.ks"
+// #include "utils/extraMath.ks"
 
 //Given a target orbit's inclination and a target velocity, calculate the required heading we must fire the engines at in order to 
 //reach that desired orbital inclination and velocity at the same time. 
@@ -29,7 +30,12 @@ function calculateThrustHeading{
 				if closerToDecendingNode{
 					set nearestNodeInclination to nearestNodeInclination *-1.
 				}
-				set longitudinalOffsetFromNearestNodeISWITP to arcSin(tan(ship:geoposition:lat)/tan(nearestNodeInclination)).	
+				//making an intermediate variable here to diagnose/prevent NaN errors
+				declare local tanLatOverTanNNI to tan(ship:geoposition:lat)/tan(nearestNodeInclination).
+				if abs(tanLatOverTanNNI > 1){
+					print("uh-oh, tanLatOverTanNNI = "+tanLatOverTanNNI+". Lat: "+round(ship:geoposition:lat,3)+". nni: "+round(nearestNodeInclination,3)).
+				}				
+				set longitudinalOffsetFromNearestNodeISWITP to arcSin(tanLatOverTanNNI).	
 			}
 			//now that we know the distance to the nearest node, we can compute the distance to the ascending node.
 			//if the nearrest node IS the ascending node... then we did it.
