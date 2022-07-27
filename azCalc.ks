@@ -26,7 +26,7 @@ function calculateThrustHeading{
 
 		//how far away from the LAN are we right now?
 		declare local realDistanceFromLAN to signedLongitudinalDifference(shipPos:lng, targetLocalTrigLan).
-		declare local longitudinalOffsetFromLocalTrigLanISWITP to convertAngleToNavScale(longitudinalDistanceFromTargetOrbitalPlane(targetOrbit)-realDistanceFromLAN).	
+		declare local longitudinalOffsetFromLocalTrigLanISWITP to convertAngleToNavScale(realDistanceFromLAN-longitudinalDistanceFromTargetOrbitalPlane(targetOrbit)).	
 		print("old function for ISWITP gets: "+getLongitudinalOffsetFromLocalLanISWITP(targetOrbit)) at (0,30).	
 		print("new function for ISWITP gets: "+longitudinalOffsetFromLocalTrigLanISWITP) at (0,31).	
 		set targetHeading to calculateProgradeCompassHeading(longitudinalOffsetFromLocalTrigLanISWITP,ship:geoposition:lat).

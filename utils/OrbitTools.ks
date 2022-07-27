@@ -137,8 +137,8 @@ function longitudinalDistanceFromTargetOrbitalPlane{
 	//how far away from the LAN are we right now?
 	declare local realDistanceFromLAN to signedLongitudinalDifference(shipPos:lng, targetLocalTrigLan).
 
-	//now we add the two...
-	declare local result to longitudinalOffsetFromLocalLanISWITP + realDistanceFromLAN.
+	//now we subtract the two...
+	declare local result to realDistanceFromLAN - longitudinalOffsetFromLocalLanISWITP.
 
 	//and make sure that it's a value between -180 and +180
 	set result to convertAngleToNavScale(result).
@@ -146,6 +146,7 @@ function longitudinalDistanceFromTargetOrbitalPlane{
 	return result.
 }
 
+//DEPRECIATED. im keeping this for now since i know this function works properly.
 //Given a target orbital plane, pretend the ship is dragged east or west such that it intersects that orbital plane.
 //The ship's latitude stays the same. Only the longitude is changed.
 //At the ship's new imaginary location, how far east or west would the ship be from that target orbit's local LAN?
