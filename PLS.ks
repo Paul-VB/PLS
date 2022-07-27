@@ -37,6 +37,11 @@ function Main{
 	declare local planeMatchTime to calculateEngineBurnTime(planeMatchVelocity).
 	declare local planeMatchTimeStamp to timestamp() + timespan(planeMatchTime).
 
+	print("Parking Orbit Summary: ").
+	print("Parking Orbit Altitude: "+parkingOrbit:periapsis).
+	print("Parking Orbit Inclination: "+parkingOrbit:inclination).
+	print("Parking Orbit LAN: "+parkingOrbit:LAN).
+
 	//TODO: get rid of this
 	print("we're trying to accelerate to a planeMatchVelocity of: "+round(planeMatchVelocity,3)+"m/s").
 	print("We need to launch "+round(planeMatchTime,3)+" seconds before we pass right under the parking orbit's plane").
