@@ -87,13 +87,63 @@ function calculateSpeedRequiredForApoapsis{
 }
 
 
-//how far east or west is the ship from intersecting a target orbital plane
+//How far east or west is the ship from intersecting a target orbital plane?
 //this is given in longitudinal degrees. 
 //positive (+) values represent east
 //negative (-) values represent west
 function longitudinalDistanceFromTargetOrbitalPlane{
 	parameter targetOrbit.
-	return signedLongitudinalDifference(longitudinalOffsetFromLocalLanISWITP(targetOrbit),ship:geoposition:lng).
+	//we will find how far east or west outside the target orbital plane we are by doing the following:
+	//1. figure how how far east or west we *would be* from the local LAN if we were in the orbital plane at our current latitude
+	//		since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
+	//2. how far east or west we *actually* are from the local LAN of the target orbit. 
+	//3. take the difference of those two values, and we should get our longitudinal distance to the orbital plane
+
+	//first lets grab our ship's current position
+	declare local shipPos to ship:geoposition.
+
+	//next, grab the target orbit's local LAN
+	declare local targetLocalTrigLan to getLocalTrigLanOfOrbit(targetOrbit).
+
+	//if the ship *was* in the target orbital plane (ISWITP), what would our longitudinal distance to the LAN be at our current latitude?
+	//pretend the ship is dragged east or west such that it intersects that orbital plane.
+	//The ship's latitude stays the same. Only the longitude is changed.
+	//At the ship's new imaginary location, how far east or west would the ship be from that target orbit's local LAN?
+	//The local LAN of an orbit is the longitude where the orbit's plane intersects it's parent planet's equator. this constantly changes as the parent planet rotates
+	//since there are always two possible answers to that question, we will use the answer that is closest to the ship's actual longitude.
+	declare local longitudinalOffsetFromLocalLanISWITP to 0.
+	{
+		//determine if we are closer to the ascending or decending node of the target orbit
+		declare local closerToDecendingNode to abs(signedLongitudinalDifference(ship:geoposition:lng,targetLocalTrigLan)) > 90.
+
+		//next, find the inclination of the nearest node, either ascending or decending
+		declare local nearestNodeInclination to targetOrbit:inclination.
+		if closerToDecendingNode{
+			set nearestNodeInclination to nearestNodeInclination *-1.
+		}
+		
+		//if the ship *was* in the target orbital plane (ISWITP), what would our longitudinal distance to the *NEAREST* node (either ascending or decending) be at our current latitude?
+		declare local longitudinalOffsetFromNearestNodeISWITP to arcSin(clamp(tan(shipPos:lat)/tan(nearestNodeInclination),-1,1)).
+
+		//now that we know the distance to the nearest node, we can compute the distance to the ascending node.
+		//if the nearrest node IS the ascending node... then we did it.
+		set longitudinalOffsetFromLocalLanISWITP to longitudinalOffsetFromNearestNodeISWITP.
+		if closerToDecendingNode{
+			//if we're closer to the decending node, we need to flip it
+			set longitudinalOffsetFromLocalLanISWITP to convertAngleToNavScale(addDegrees(longitudinalOffsetFromLocalLanISWITP,180)).
+		}
+	}
+
+	//how far away from the LAN are we right now?
+	declare local realDistanceFromLAN to signedLongitudinalDifference(shipPos:lng, targetLocalTrigLan).
+
+	//now we add the two...
+	declare local result to longitudinalOffsetFromLocalLanISWITP + realDistanceFromLAN.
+
+	//and make sure that it's a value between -180 and +180
+	set result to convertAngleToNavScale(result).
+
+	return result.
 }
 
 //Given a target orbital plane, pretend the ship is dragged east or west such that it intersects that orbital plane.

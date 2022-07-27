@@ -11,39 +11,24 @@
 //tldr: current vector - target vector = thrust vector
 function calculateThrustHeading{
 	parameter targetOrbit,planeMatchVelocity.
+
+	//lets grab our ship's current position
+	declare local shipPos to ship:geoposition.
+
 	//grab the ship's local lan in trig scale. we'll need it a few times
 	declare local localTrigLan to getLocalTrigLanOfOrbit(ship:orbit).
 
 	//grab the target orbit's current local lan
 	declare local targetLocalTrigLan to getLocalTrigLanOfOrbit(targetOrbit).
 
-	//determine if we are closer to the ascending or decending node of the target orbit
-	declare local closerToDecendingNode to abs(signedLongitudinalDifference(ship:geoposition:lng,targetLocalTrigLan)) > 90.
-
 	//calculate the heading of the target vector
 	declare local targetHeading to 0.{
-		//if the ship *was* in the target orbital plane (ISWITP), what would our longitudinal distance to the LAN be at our current lattitude?
-		declare local longitudinalOffsetFromLocalTrigLanISWITP to 0.{
-			//forget ascending vs decending for just a second. if the ship was in the targetplane (ISWITP), what would the longitududnal offset be to the NEAREST node?
-			declare local longitudinalOffsetFromNearestNodeISWITP to 0.{
-				declare local nearestNodeInclination to targetOrbit:inclination.
-				if closerToDecendingNode{
-					set nearestNodeInclination to nearestNodeInclination *-1.
-				}
-				//making an intermediate variable here to diagnose/prevent NaN errors
-				declare local tanLatOverTanNNI to tan(ship:geoposition:lat)/tan(nearestNodeInclination).	
-				set tanLatOverTanNNI to clamp(tanLatOverTanNNI,-1,1).	
-				set longitudinalOffsetFromNearestNodeISWITP to arcSin(tanLatOverTanNNI).	
-			}
-			//now that we know the distance to the nearest node, we can compute the distance to the ascending node.
-			//if the nearrest node IS the ascending node... then we did it.
-			set longitudinalOffsetFromLocalTrigLanISWITP to longitudinalOffsetFromNearestNodeISWITP.
-			if closerToDecendingNode{
-				//if we're closer to the decending node, we need to flip it
-				set longitudinalOffsetFromLocalTrigLanISWITP to convertAngleToNavScale(addDegrees(longitudinalOffsetFromLocalTrigLanISWITP,180)).
-				//set longitudinalOffsetFromLocalTrigLanISWITP to mod(longitudinalOffsetFromLocalTrigLanISWITP + 180,180).
-			}
-		}
+
+		//how far away from the LAN are we right now?
+		declare local realDistanceFromLAN to signedLongitudinalDifference(shipPos:lng, targetLocalTrigLan).
+		declare local longitudinalOffsetFromLocalTrigLanISWITP to convertAngleToNavScale(longitudinalDistanceFromTargetOrbitalPlane(targetOrbit)-realDistanceFromLAN).	
+		print("old function for ISWITP gets: "+getLongitudinalOffsetFromLocalLanISWITP(targetOrbit)) at (0,30).	
+		print("new function for ISWITP gets: "+longitudinalOffsetFromLocalTrigLanISWITP) at (0,31).	
 		set targetHeading to calculateProgradeCompassHeading(longitudinalOffsetFromLocalTrigLanISWITP,ship:geoposition:lat).
 	}
 	//calculate the heading of the current vector
