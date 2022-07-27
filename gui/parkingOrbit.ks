@@ -22,7 +22,7 @@ function promptUserForParkingOrbit{
 		declare local bodyRow0 to bodyBox:addhbox().{
 			addNumberFieldWidget(bodyRow0,"Altitude",setAltitude@).
 			addNumberFieldWidget(bodyRow0,"Inclination",setInclination@).
-			addNumberFieldWidget(bodyRow0,"LAN",setInclination@).
+			addNumberFieldWidget(bodyRow0,"LAN",setLAN@).
 		}
 		declare local finishedButton to bodyBox:addbutton("Finished").
 		set finishedButton:onclick to finish@.
