@@ -14,15 +14,15 @@ function calculateNextLaunchWindow{
 	//3. that many seconds from now (minus launch duration) will be the time of our next launch window.
 
 	//how many degrees east away is the target orbital plane?
-	declare local degreesEastToLaunchWindow to longitudinalDistanceFromTargetOrbitalPlane(targetOrbit).
-	//if degreesEastToLaunchWindow is positive, that means the orbital plane is west of us and we just missed a launch window. 
+	declare local degreesEastToLaunchWindow to longitudinalDistanceFromTargetOrbitalPlane(targetOrbit)*-1.
+	//if degreesEastToLaunchWindow is negative, that means we are east of the orbital plane and we just missed a launch window. 
 	//We need to aim for the next window
 	if degreesEastToLaunchWindow < 0 {
-		set degreesEastToLaunchWindow to 180 - degreesEastToLaunchWindow.
+		set degreesEastToLaunchWindow to degreesEastToLaunchWindow + 180.
 	}
 
 	//how many seconds will it take the planet to rotate that many degrees?
-	declare local timeToRotate to rotationSpeed(targetOrbit:body)*degreesEastToLaunchWindow.
+	declare local timeToRotate to rotationSpeed(targetOrbit:body)*degreesEastToLaunchWindow.	
 
 	//how long do we need to wait until the next launch window?
 	declare local waitDuration to timeToRotate - launchDuration.
@@ -34,5 +34,5 @@ function calculateNextLaunchWindow{
 //how many degrees per second does a given body rotate?
 function rotationSpeed{
 	parameter theBody.
-	return 360/theBody:rotationPeriod.
+	return theBody:rotationPeriod/360.
 }
