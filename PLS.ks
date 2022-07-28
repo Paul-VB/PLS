@@ -37,23 +37,39 @@ function Main{
 	//TODO: this should use the difference between our starting velocity and planeMatchVelocity
 	declare local launchDuration to calculateEngineBurnTime(planeMatchVelocity).
 
+	//next, we need to find out when the next launch window is.
+	declare local nextLaunchWindowTimestamp to calculateNextLaunchWindow(parkingOrbit,launchDuration).
+
+	//next, lets get the height of the launch tower (the tallest launch clamp)
+	declare local towerHeight to getLaunchTowerMaxHeight().
+
 	print("Parking Orbit Summary: ").
 	print("Parking Orbit Altitude: "+parkingOrbit:periapsis).
 	print("Parking Orbit Inclination: "+parkingOrbit:inclination).
 	print("Parking Orbit LAN: "+parkingOrbit:LAN).
 
-	//TODO: get rid of this
-	print("we're trying to accelerate to a planeMatchVelocity of: "+round(planeMatchVelocity,3)+"m/s").
-	print("We need to launch "+round(launchDuration,3)+" seconds before we pass right under the parking orbit's plane").
-
-	//next, lets get the height of the launch tower (the tallest launch clamp)
-	declare local towerHeight to getLaunchTowerMaxHeight().
-
-	//next, we need to find out when the next launch window is.
-	declare local nextLaunchWindowTimestamp to calculateNextLaunchWindow(parkingOrbit,launchDuration).
-
+	//next, lets define the launchPhases, aka runmodes.
+	declare local launchPhases to list().
+	launchPhases.add("countdown").
+	launchPhases.add("liftoff").
+	launchPhases.add("clearTheTower").
+	launchPhases.add("rollProgram").
+	launchPhases.add("mainAscent").
+	launchPhases.add("coastToApoapsis").
+	launchPhases.add("circularize").
+	launchPhases.add("done").
+	
 	//now we just need to wait until the next launch window
 	warpTo(nextLaunchWindowTimestamp:seconds -15).
+
+	//the index of the current launch phase we are in
+	declare local currLaunchPhaseIndex to 0.
+
+	//the runMode loop
+	until launchPhases[currLaunchPhaseIndex] = "done"{
+
+
+	}
 
 	//now we wait until we have launched.
 	print("waiting for liftoff...").
