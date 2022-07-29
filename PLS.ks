@@ -65,12 +65,12 @@ function Main{
 	declare local launchWindowLeeway to 1.
 
 	//are we close to the launch window time?
-	local lock timeRemaining to time:seconds - nextLaunchWindowTimestamp:seconds.
+	local lock timeRemainingUntilLaunch to time:seconds - nextLaunchWindowTimestamp:seconds.
 	
 	//now we just need to wait until the next launch window
 	warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
 	hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
-	until(timeRemaining*-1 <= countdownTime){
+	until(timeRemainingUntilLaunch*-1 <= countdownTime){
 		wait 1.
 	}
 
@@ -83,8 +83,8 @@ function Main{
 		//count down until liftoff
 		if launchPhases[currLaunchPhaseIndex] = "countdown"{
 			declare local timeStep to 1.
-			until(0<timeRemaining and timeRemaining < launchWindowLeeway){
-				hudPrint0("T"+round(timeRemaining,0),timeStep).
+			until(0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway){
+				hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
 				wait timeStep.
 			}
 			//things that must happen immediately upon launch
@@ -168,25 +168,38 @@ function Main{
 			//we need to unlock steering before we begin coasting. Steering may have been locked by a previous launch phase.
 			//if it's already locked then the steering will not be updated due to the code that allows the player to take over control at any time.
 			unlock steering.
-			// //keep coasting until it is time to make the circularization burn.... but when will that be? i'll get to that...
-			// until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
-			// 	//check staging
-			// 	autoStage().
-			// 	//check if steering should be unlocked
-			// 	if (SAS or isPlayerTryingToSteer()){
-			// 		//the player can turn on SAS at any time to disengage the autopilot
-			// 		print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
-			// 		UNLOCK STEERING.
-			// 		UNLOCK THROTTLE.
-			// 	} else {
-			// 		//we know we should be steering. Next check if we currently *are* steering
-			// 		if (not steeringManager:enabled){
-			// 			lock steering to prograde.
-			// 		}
-			// 	}
-			// }
-			// UNLOCK STEERING.
-			// print("Coasting complete.").	
+			//coast prograde
+			lock steering to prograde.
+
+			//now lets figure out the circularization burn.
+			//How much deltaV will we need to expend?
+			declare local circularizationBurnDeltaV to calculateApoapsisCircularizationDeltaV(ship:orbit).
+			//how long will the engine burn be?
+			declare local circularizationBurnDuration to calculateEngineBurnTime(circularizationBurnDeltaV).
+			//we want to center the burn at apoapsis. how far in the future will we need to start the burn?
+			declare local circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (circularizationBurnDuration*0.5)).
+			local lock timeRemainingUntilCircularizationBurn to time:seconds - circularizationBurnStartTimestamp:seconds.
+
+
+			//keep coasting until it is time to make the circularization burn
+			until (0<timeRemainingUntilCircularizationBurn){
+				//check if steering should be unlocked
+				if (SAS or isPlayerTryingToSteer()){
+					//the player can turn on SAS at any time to disengage the autopilot
+					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
+					UNLOCK STEERING.
+					UNLOCK THROTTLE.
+				} else {
+					//we know we should be steering. Next check if we currently *are* steering
+					if (not steeringManager:enabled){
+						lock steering to prograde.
+					}
+				}
+			}
+			UNLOCK STEERING.
+			print("Coasting complete.").
+			//now it should be time to make the circularization burn
+			
 			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
 
