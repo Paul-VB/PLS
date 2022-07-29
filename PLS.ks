@@ -212,10 +212,10 @@ function Main{
 			//full throttle.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
 			until (0<timeRemainingUntilEndOfCircularizationBurn){
+				//check staging
+				autoStage().
 				//check if steering should be unlocked
 				if (SAS or isPlayerTryingToSteer()){
-					//check staging
-					autoStage().
 					//the player can turn on SAS at any time to disengage the autopilot
 					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
 					UNLOCK STEERING.
@@ -227,6 +227,8 @@ function Main{
 					}
 				}
 			}
+			//set throttle to 0.
+			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 			print("Circularization complete.").
 			UNLOCK STEERING.
 			UNLOCK THROTTLE.
