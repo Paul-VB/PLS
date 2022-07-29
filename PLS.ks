@@ -57,9 +57,21 @@ function Main{
 	launchPhases:add("coastToApoapsis").
 	launchPhases:add("circularize").
 	launchPhases:add("done").
+
+	//how long we want the countdown to be
+	declare local countdownTime to 10.
+
+	//how much leeway (in seconds) we want to have for checking if now is a launch window
+	declare local launchWindowLeeway to 1.
+
+	//are we close to the launch window time?
+	local lock timeRemaining to time:seconds - nextLaunchWindowTimestamp:seconds.
 	
 	//now we just need to wait until the next launch window
-	warpTo(nextLaunchWindowTimestamp:seconds -15).
+	warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
+	until(timeRemaining*-1 <= countdownTime){
+		wait 1.
+	}
 
 	//the index of the current launch phase we are in
 	declare local currLaunchPhaseIndex to 0.
@@ -69,10 +81,8 @@ function Main{
 
 		//count down until liftoff
 		if launchPhases[currLaunchPhaseIndex] = "countdown"{
-			//how much leeway (in seconds) we want to have for checking if now is a launch window
-			declare local launchWindowLeeway to 1.
-			//are we close to the launch window time?
-			until(abs(time:seconds - nextLaunchWindowTimestamp:seconds)<launchWindowLeeway){
+			until(0<timeRemaining and timeRemaining < launchWindowLeeway){
+				print ("T"+toStringSigned(round(timeRemaining,0))) at (0,4).
 				wait 1.
 			}
 			//things that must happen immediately upon launch
