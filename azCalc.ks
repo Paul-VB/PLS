@@ -74,3 +74,14 @@ function calculateProgradeCompassHeading{
 	set result to clampAngleBetween0and360(result).
 	return result.
 }
+
+//calculates what compass heading our prograde vector is at any given point in an orbit (or suborbital flight).
+function calculateCurrentProgradeCompassHeading{
+	//lets grab our ship's current position
+	declare local shipPos to ship:geoposition.
+
+	//grab the ship's local lan in trig scale. we'll need it a few times
+	declare local localTrigLan to getLocalTrigLanOfOrbit(ship:orbit).
+
+	return calculateProgradeCompassHeading(signedLongitudinalDifference(shipPos:lng, localTrigLan),shipPos:lat).
+}
