@@ -7,7 +7,7 @@ declare local basePath to "0:/PLS/".
 runOncePath(basePath+"utils/orbitTools.ks").
 runOncePath(basePath+"utils/navigationDegreeTools.ks").
 runOncePath(basePath+"azCalc.ks").
-runOncePath(basePath+"ApoLaunchPitchProgram.ks",(10)).
+runOncePath(basePath+"ApoLaunchPitchProgram.ks",(13)).
 runOncePath(basePath+"engineBurnTimeCalc.ks").
 runOncePath(basePath+"launchWindowCalc.ks").
 runOncePath(basePath+"utils/autoStage.ks").
