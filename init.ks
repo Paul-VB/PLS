@@ -13,4 +13,5 @@ runOncePath(basePath+"launchWindowCalc.ks").
 runOncePath(basePath+"utils/autoStage.ks").
 runOncePath(basePath+"gui/parkingOrbit.ks").
 runOncePath(basePath+"gui/guiSkin.ks").
+runOncePath(basePath+"gui/hudStuff.ks").
 runOncePath(basePath+"utils/extraMath.ks").

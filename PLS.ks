@@ -7,6 +7,7 @@ clearScreen.
 // #include "azCalc.ks"
 // #include "launchWindowCalc.ks"
 // #include "gui/parkingOrbit.ks"
+// #include "gui/hudStuff.ks"
 // #include "engineBurnTimeCalc.ks"
 // #include "utils/autoStage.ks"
 runOncePath("PLS/init.ks").
@@ -69,6 +70,7 @@ function Main{
 	
 	//now we just need to wait until the next launch window
 	warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
+	hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
 	until(timeRemaining*-1 <= countdownTime){
 		wait 1.
 	}
@@ -81,9 +83,10 @@ function Main{
 
 		//count down until liftoff
 		if launchPhases[currLaunchPhaseIndex] = "countdown"{
+			declare local timeStep to 1.
 			until(0<timeRemaining and timeRemaining < launchWindowLeeway){
-				print ("T"+toStringSigned(round(timeRemaining,0))) at (0,4).
-				wait 1.
+				hudPrint0("T"+round(timeRemaining,0),timeStep).
+				wait timeStep.
 			}
 			//things that must happen immediately upon launch
 			//turn SAS off. There is a known bug in KOS with SAS and cooked controls
