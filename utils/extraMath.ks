@@ -17,3 +17,13 @@ function clamp{
 	parameter value, minimum, maximum.
 	return min(maximum,(max(minimum,value))).
 }
+
+//given a number, return it as a string with either a positive (+) or negative (-) sign before it
+function toStringSigned{
+	parameter number.
+	declare local result to number:tostring.
+	if number > 0 {
+		set result to "+"+result.
+	}
+	return result.
+}
