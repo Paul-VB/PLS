@@ -194,13 +194,14 @@ function getOrbitalSpeedAtAltitude{
 }
 
 //given an orbit, calculate how much deltaV will be required to circularize the orbit at apoapsis.
+//this orbit should be the ship's CURRENT orbit, not the target orbit.
 function calculateApoapsisCircularizationDeltaV{
-	parameter theOrbit.
+	parameter currentOrbit.
 	//first, lets find how how fast we *should* be going at apoapsis to have a circular orbit
-	declare local circularSpeed to getOrbitalVelocityOfCircularOrbit(createCircularCoplanarOrbit(theOrbit,theOrbit:apoapsis)).
+	declare local circularSpeed to getOrbitalVelocityOfCircularOrbit(createCircularCoplanarOrbit(currentOrbit,currentOrbit:apoapsis)).
 
 	//then lets find out how fast we'll *actually* be going at apoapsis
-	declare local actualSpeed to getOrbitalSpeedAtAltitude(theOrbit,theOrbit:apoapsis).
+	declare local actualSpeed to getOrbitalSpeedAtAltitude(currentOrbit,currentOrbit:apoapsis).
 
 	//find the difference and return
 	return circularSpeed - actualSpeed.
