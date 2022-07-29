@@ -69,8 +69,10 @@ function Main{
 
 		//count down until liftoff
 		if launchPhases[currLaunchPhaseIndex] = "countdown"{
-			//are we within 1 second of the actual launch window time?
-			until(time - nextLaunchWindowTimestamp < 1){
+			//how much leeway (in seconds) we want to have for checking if now is a launch window
+			declare local launchWindowLeeway to 1.
+			//are we close to the launch window time?
+			until(abs(time:seconds - nextLaunchWindowTimestamp:seconds)<launchWindowLeeway){
 				wait 1.
 			}
 			//things that must happen immediately upon launch
