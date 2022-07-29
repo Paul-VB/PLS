@@ -199,7 +199,35 @@ function Main{
 			UNLOCK STEERING.
 			print("Coasting complete.").
 			//now it should be time to make the circularization burn
-			
+
+			//lets recompute the burn time incase the atmosphere slowed us down.
+			set circularizationBurnDeltaV to calculateApoapsisCircularizationDeltaV(ship:orbit).
+			set circularizationBurnDuration to calculateEngineBurnTime(circularizationBurnDeltaV).
+
+			//at what time stamp should we stop firing the engines?
+			declare local circularizationBurnEndTimestamp to time+circularizationBurnDuration.
+			local lock timeRemainingUntilEndOfCircularizationBurn to time:seconds - circularizationBurnEndTimestamp:seconds.
+
+			print("Starting Circularization Burn.").
+			//full throttle.
+			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
+			until (0<timeRemainingUntilEndOfCircularizationBurn){
+				//check if steering should be unlocked
+				if (SAS or isPlayerTryingToSteer()){
+					//the player can turn on SAS at any time to disengage the autopilot
+					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
+					UNLOCK STEERING.
+					UNLOCK THROTTLE.
+				} else {
+					//we know we should be steering. Next check if we currently *are* steering
+					if (not steeringManager:enabled){
+						lock steering to prograde. //TODO: make this aim at the horizon.
+					}
+				}
+			}
+			print("Circularization complete.").
+			UNLOCK STEERING.
+			UNLOCK THROTTLE.
 			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
 
