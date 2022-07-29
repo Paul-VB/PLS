@@ -50,14 +50,13 @@ function Main{
 
 	//next, lets define the launchPhases, aka runmodes.
 	declare local launchPhases to list().
-	launchPhases.add("countdown").
-	launchPhases.add("liftoff").
-	launchPhases.add("clearTheTower").
-	launchPhases.add("rollProgram").
-	launchPhases.add("mainAscent").
-	launchPhases.add("coastToApoapsis").
-	launchPhases.add("circularize").
-	launchPhases.add("done").
+	launchPhases:add("countdown").
+	launchPhases:add("clearTheTower").
+	launchPhases:add("rollProgram").
+	launchPhases:add("mainAscent").
+	launchPhases:add("coastToApoapsis").
+	launchPhases:add("circularize").
+	launchPhases:add("done").
 	
 	//now we just need to wait until the next launch window
 	warpTo(nextLaunchWindowTimestamp:seconds -15).
@@ -65,89 +64,123 @@ function Main{
 	//the index of the current launch phase we are in
 	declare local currLaunchPhaseIndex to 0.
 
-	//the runMode loop
+	//the launch loop
 	until launchPhases[currLaunchPhaseIndex] = "done"{
 
-
-	}
-
-	//now we wait until we have launched.
-	print("waiting for liftoff...").
-	until (isShipLanded()){
-		//wait for it....
-	}
-	print("Liftoff!").
-	//launch phase 0: things that must happen immediately upon launch
-	{
-		//turn SAS off. There is a known bug in KOS with SAS and cooked controls
-		SAS off.
-		//set throttle to max.
-		SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
-	}
-
-	//launch phase 1: clear the tower
-	{
-		declare local towerIsClear to false.
-		//do we even have a tower to clear?
-		if towerHeight = 0{
-			//no tower to clear
-			set towerIsClear to true.
-		}
-		//launch straight up with no roll until we clear the tower
-		declare local initialFacingRoll to ship:facing:roll.
-		lock steering to up + r(0,0,initialFacingRoll).
-		until(towerIsClear){
-			//keep checking if we have cleared the tower
-			set towerIsClear to ship:altitude - LaunchAltitude > towerHeight.
-		}
-		print("tower clear").
-	}
-	
-	//launch phase 2: roll program
-	{
-		print("starting roll program...").
-		declare local rollComplete to false.
-		declare local maxRollErrorAngle to 1.
-		declare local initalAzimuth to calculateThrustHeading(parkingOrbit,planeMatchVelocity).
-		lock steering to heading(initalAzimuth,90).
-		until(rollComplete){
-			//see if we have rolled enough
-			declare local currentRollErrorAngle to abs(initalAzimuth - ship:facing:roll)-180.
-			if currentRollErrorAngle<=maxRollErrorAngle {
-				set rollComplete to true.
+		//count down until liftoff
+		if launchPhases[currLaunchPhaseIndex] = "countdown"{
+			//are we within 1 second of the actual launch window time?
+			until(time - nextLaunchWindowTimestamp < 1){
+				wait 1.
 			}
-
-		}
-		print("Roll complete.").		
-	}
-
-	//launch phase 3: the main launch ascent
-	{
-		unlock steering.
-		//keep firing until our current apoapsis meets our target
-		until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
-			//check staging
+			//things that must happen immediately upon launch
+			//turn SAS off. There is a known bug in KOS with SAS and cooked controls
+			SAS off.
+			//set throttle to max.
+			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
+			//lets light this candle!
 			autoStage().
-			//check if steering should be unlocked
-			if (SAS or isPlayerTryingToSteer()){
-				//the player can turn on SAS at any time to disengage the autopilot
-				print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
-				UNLOCK STEERING.
-				UNLOCK THROTTLE.
-			} else {
-				//we know we should be steering. Next check if we currently *are* steering
-				if (not steeringManager:enabled){
-					lock steering to heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).
+			print("Liftoff!").
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}		
 
+		//clear the tower
+		else if launchPhases[currLaunchPhaseIndex] = "clearTheTower"{
+			//do we even have a tower to clear?
+			declare local towerExists to towerHeight <> 0.
+			if towerExists{
+				declare local towerIsClear to false.
+				//launch straight up with no roll until we clear the tower
+				declare local initialFacingRoll to ship:facing:roll.
+				lock steering to up + r(0,0,initialFacingRoll).
+				until(towerIsClear){
+					//keep checking if we have cleared the tower
+					set towerIsClear to ship:altitude - LaunchAltitude > towerHeight.
+				}
+				print("tower clear").
+			}
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}
+
+		//roll program
+		else if launchPhases[currLaunchPhaseIndex] = "rollProgram"{
+			print("starting roll program...").
+			declare local rollComplete to false.
+			declare local maxRollErrorAngle to 1.
+			declare local initialAzimuth to calculateThrustHeading(parkingOrbit,planeMatchVelocity).
+			lock steering to heading(initialAzimuth,90).
+			until(rollComplete){
+				//see if we have rolled enough
+				declare local currentRollErrorAngle to abs(initialAzimuth - ship:facing:roll)-180.
+				if currentRollErrorAngle<=maxRollErrorAngle {
+					set rollComplete to true.
 				}
 			}
+			print("Roll complete.").	
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
-	}
 
-	//launch phase 4: keep burning the engines a bit to counteract atmospheric drag
-	{
-		//set throttle to 0.
-		SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
+		//main Ascent
+		else if launchPhases[currLaunchPhaseIndex] = "mainAscent"{
+			//we need to unlock steering before we begin our main ascent. Steering may have been locked by a previous launch phase.
+			//if it's already locked then the steering will not be updated due to the code that allows the player to take over control at any time.
+			unlock steering.
+			//keep firing until our current apoapsis meets our target
+			until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
+				//check staging
+				autoStage().
+				//check if steering should be unlocked
+				if (SAS or isPlayerTryingToSteer()){
+					//the player can turn on SAS at any time to disengage the autopilot
+					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
+					UNLOCK STEERING.
+					UNLOCK THROTTLE.
+				} else {
+					//we know we should be steering. Next check if we currently *are* steering
+					if (not steeringManager:enabled){
+						lock steering to heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).
+					}
+				}
+			}
+			UNLOCK STEERING.
+			print("Main Ascent complete.").	
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}
+
+		//coast to apoapsis
+		else if launchPhases[currLaunchPhaseIndex] = "coastToApoapsis"{
+			//set throttle to 0.
+			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
+			//we need to unlock steering before we begin coasting. Steering may have been locked by a previous launch phase.
+			//if it's already locked then the steering will not be updated due to the code that allows the player to take over control at any time.
+			unlock steering.
+			// //keep coasting until it is time to make the circularization burn.... but when will that be? i'll get to that...
+			// until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
+			// 	//check staging
+			// 	autoStage().
+			// 	//check if steering should be unlocked
+			// 	if (SAS or isPlayerTryingToSteer()){
+			// 		//the player can turn on SAS at any time to disengage the autopilot
+			// 		print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
+			// 		UNLOCK STEERING.
+			// 		UNLOCK THROTTLE.
+			// 	} else {
+			// 		//we know we should be steering. Next check if we currently *are* steering
+			// 		if (not steeringManager:enabled){
+			// 			lock steering to prograde.
+			// 		}
+			// 	}
+			// }
+			// UNLOCK STEERING.
+			// print("Coasting complete.").	
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}
+
+		//circularize
+		else if launchPhases[currLaunchPhaseIndex] = "circularize"{
+			//do stuff
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}
 	}
 }
 
