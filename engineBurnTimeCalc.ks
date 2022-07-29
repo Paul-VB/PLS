@@ -98,17 +98,15 @@ function calculateStageMassesCumulatively{
 
 	//init the massesLexicon
 	declare local numberOfStages to ship:stageNum.
-	FROM {local currStageIndex is numberOfStages.} UNTIL currStageIndex = -1 STEP {set currStageIndex to currStageIndex-1.} DO {
-		if not masses:haskey(currStageIndex){
-			masses:add(currStageIndex,0).
-		}
-	}
 
 	//loop through each part and add its mass to its stage's current runningTotal
 	declare local allParts to list().
 	list parts IN allParts.
 	for part in allParts{
 		declare local currPartStage to part:stage+1.//we add 1 here because the stage numbering is dum
+		if not masses:haskey(currPartStage){
+			masses:add(currPartStage,0).
+		}
 		set masses[currPartStage] to masses[currPartStage] + part:mass.
 	}
 
