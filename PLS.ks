@@ -221,7 +221,7 @@ function Main{
 				} else {
 					//we know we should be steering. Next check if we currently *are* steering
 					if (not steeringManager:enabled){
-						lock steering to prograde. //TODO: make this aim at the horizon.
+						lock steering to heading(calculateCurrentProgradeCompassHeading(),0).
 					}
 				}
 			}
