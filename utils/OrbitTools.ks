@@ -76,7 +76,7 @@ function isOrbitPrograde{
 	return theOrbit:inclination <= 90.
 }
 
-//calculate the instantaneous speed we need to raise our apoapsis to a target altitude using the vis-viva equasion
+//calculate the instantaneous speed we need to raise our apoapsis to a target altitude using the vis-viva equation
 //this function takes into account our current (sub)orbital parameters
 function calculateSpeedRequiredForApoapsis{
 	parameter targetApoapsis.
@@ -182,6 +182,28 @@ function getLongitudinalOffsetFromLocalLanISWITP{
 		set longitudinalOffsetFromLocalLanISWITP to convertAngleToNavScale(addDegrees(longitudinalOffsetFromLocalLanISWITP,180)).
 	}
 	return longitudinalOffsetFromLocalLanISWITP.
+}
+
+//given an orbit, what will the orbital speed be at that specific altitude?
+//this function uses the vis-viva equation
+function getOrbitalSpeedAtAltitude{
+	parameter theOrbit, desiredAltitude.
+	declare local distanceToCenterOfBody to desiredAltitude + theOrbit:body:radius.
+	declare local speed to sqrt(theOrbit:body:mu * ((2/distanceToCenterOfBody)-(1/theOrbit:SMA))).
+	return speed.
+}
+
+//given an orbit, calculate how much deltaV will be required to circularize the orbit at apoapsis.
+function calculateApoapsisCircularizationDeltaV{
+	parameter theOrbit.
+	//first, lets find how how fast we *should* be going at apoapsis to have a circular orbit
+	declare local circularSpeed to getOrbitalVelocityOfCircularOrbit(createCircularCoplanarOrbit(theOrbit,theOrbit:apoapsis)).
+
+	//then lets find out how fast we'll *actually* be going at apoapsis
+	declare local actualSpeed to getOrbitalSpeedAtAltitude(theOrbit,theOrbit:apoapsis).
+
+	//find the difference and return
+	return circularSpeed - actualSpeed.
 }
 
 //calculates what compass heading the prograde vector is for a ship at any given point in an orbit (or suborbital flight) - correct
