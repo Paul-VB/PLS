@@ -55,8 +55,7 @@ function Main{
 	launchPhases:add("clearTheTower").
 	launchPhases:add("rollProgram").
 	launchPhases:add("mainAscent").
-	launchPhases:add("coastToApoapsis").
-	launchPhases:add("circularize").
+	launchPhases:add("coastAndCircularize").
 	launchPhases:add("done").
 
 	//how long we want the countdown to be
@@ -162,8 +161,8 @@ function Main{
 			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
 
-		//coast to apoapsis
-		else if launchPhases[currLaunchPhaseIndex] = "coastToApoapsis"{
+		//coast to apoapsis and Circularize
+		else if launchPhases[currLaunchPhaseIndex] = "coastAndCircularize"{
 			//set throttle to 0.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 			//we need to unlock steering before we begin coasting. Steering may have been locked by a previous launch phase.
@@ -191,11 +190,6 @@ function Main{
 			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
 
-		//circularize
-		else if launchPhases[currLaunchPhaseIndex] = "circularize"{
-			//do stuff
-			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
-		}
 	}
 }
 
