@@ -189,7 +189,7 @@ function getLongitudinalOffsetFromLocalLanISWITP{
 function getOrbitalSpeedAtAltitude{
 	parameter theOrbit, desiredAltitude.
 	declare local distanceToCenterOfBody to desiredAltitude + theOrbit:body:radius.
-	declare local speed to sqrt(theOrbit:body:mu * ((2/distanceToCenterOfBody)-(1/theOrbit:SMA))).
+	declare local speed to sqrt(theOrbit:body:mu * ((2/distanceToCenterOfBody)-(1/theOrbit:SEMIMAJORAXIS))).
 	return speed.
 }
 
