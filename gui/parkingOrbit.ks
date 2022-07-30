@@ -8,7 +8,7 @@ declare local orbitAltitude to 0.
 declare local inclination to 0.
 declare local LAN to 0.
 
-//displayes and prompts the user to enter the parking orbit parameters
+//displays and prompts the user to enter the parking orbit parameters
 function promptUserForParkingOrbit{
 	//define the gui window
 	declare local window to gui(600).
