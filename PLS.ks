@@ -8,6 +8,7 @@ clearScreen.
 // #include "launchWindowCalc.ks"
 // #include "gui/parkingOrbit.ks"
 // #include "gui/hudStuff.ks"
+// #include "gui/warpPrompt.ks"
 // #include "engineBurnTimeCalc.ks"
 // #include "utils/autoStage.ks"
 runOncePath("PLS/init.ks").
@@ -24,6 +25,7 @@ function Main{
 
 	//first, ask the user to enter stats for the parking orbit.
 	declare local parkingOrbit to promptUserForParkingOrbit().
+	
 	//lets redefine our parking orbit to an orbit we can actually physically reach. we'll need this incase our target orbit's inclination is below our launch lattitude.
 	set parkingOrbit to calculateParkingOrbit(parkingOrbit,LaunchPosition).
 
@@ -57,27 +59,31 @@ function Main{
 	launchPhases:add("coastAndCircularize").
 	launchPhases:add("done").
 
-	//how long we want the countdown to be
-	declare local countdownTime to 10.
+	//should we warp to the launch window?
+	if confirmWarpToLaunchWindow(){
+		//how long we want the countdown to be
+		declare local countdownTime to 10.
 
-	//how much leeway (in seconds) we want to have for checking if now is a launch window
-	declare local launchWindowLeeway to 1.
+		//how much leeway (in seconds) we want to have for checking if now is a launch window
+		declare local launchWindowLeeway to 1.
 
-	//are we close to the launch window time?
-	local lock timeRemainingUntilLaunch to time:seconds - nextLaunchWindowTimestamp:seconds.
+		//are we close to the launch window time?
+		local lock timeRemainingUntilLaunch to time:seconds - nextLaunchWindowTimestamp:seconds.
+		
+		//now we just need to wait until the next launch window, or dont wait if we're already in the air
+		warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
+		hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
+		until(timeRemainingUntilLaunch*-1 <= countdownTime or not isShipLanded()){
+			wait 1.
+		}
+		//count down until liftoff, or dont if we're already in the air
+		declare local timeStep to 1.
+		until((0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway)or not isShipLanded()){
+			hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
+			wait timeStep.
+		}
+	}
 	
-	//now we just need to wait until the next launch window, or dont wait if we're already in the air
-	warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
-	hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
-	until(timeRemainingUntilLaunch*-1 <= countdownTime or not isShipLanded()){
-		wait 1.
-	}
-	//count down until liftoff, or dont if we're already in the air
-	declare local timeStep to 1.
-	until((0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway)or not isShipLanded()){
-		hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
-		wait timeStep.
-	}
 	//things that must happen immediately upon launch
 	//turn SAS off. There is a known bug in KOS with SAS and cooked controls
 	SAS off.
