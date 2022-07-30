@@ -51,7 +51,6 @@ function Main{
 
 	//next, lets define the launchPhases, aka runmodes.
 	declare local launchPhases to list().
-	launchPhases:add("countdown").
 	launchPhases:add("clearTheTower").
 	launchPhases:add("rollProgram").
 	launchPhases:add("mainAscent").
@@ -67,12 +66,27 @@ function Main{
 	//are we close to the launch window time?
 	local lock timeRemainingUntilLaunch to time:seconds - nextLaunchWindowTimestamp:seconds.
 	
-	//now we just need to wait until the next launch window
+	//now we just need to wait until the next launch window, or dont wait if we're already in the air
 	warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
 	hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
-	until(timeRemainingUntilLaunch*-1 <= countdownTime){
+	until(timeRemainingUntilLaunch*-1 <= countdownTime or not isShipLanded()){
 		wait 1.
 	}
+	//count down until liftoff, or dont if we're already in the air
+	declare local timeStep to 1.
+	until((0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway)or not isShipLanded()){
+		hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
+		wait timeStep.
+	}
+	//things that must happen immediately upon launch
+	//turn SAS off. There is a known bug in KOS with SAS and cooked controls
+	SAS off.
+	//set throttle to max.
+	SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
+	//lets light this candle!
+	autoStage().
+	print("Liftoff!").
+	
 
 	//the index of the current launch phase we are in
 	declare local currLaunchPhaseIndex to 0.
@@ -80,26 +94,9 @@ function Main{
 	//the launch loop
 	until launchPhases[currLaunchPhaseIndex] = "done"{
 
-		//count down until liftoff
-		if launchPhases[currLaunchPhaseIndex] = "countdown"{
-			declare local timeStep to 1.
-			until(0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway){
-				hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
-				wait timeStep.
-			}
-			//things that must happen immediately upon launch
-			//turn SAS off. There is a known bug in KOS with SAS and cooked controls
-			SAS off.
-			//set throttle to max.
-			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
-			//lets light this candle!
-			autoStage().
-			print("Liftoff!").
-			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
-		}		
 
 		//clear the tower
-		else if launchPhases[currLaunchPhaseIndex] = "clearTheTower"{
+		if launchPhases[currLaunchPhaseIndex] = "clearTheTower"{
 			//do we even have a tower to clear?
 			declare local towerExists to towerHeight <> 0.
 			if towerExists{
@@ -247,7 +244,7 @@ function calculateCurrentRequiredPitchAngle{
 function isShipLanded{
 	parameter shipToCheck is ship.
 	declare local listOfAcceptableShipStatuses to list("PRELAUNCH","LANDED").
-	return (listOfAcceptableShipStatuses:indexof(shipToCheck:status) = -1).
+	return not(listOfAcceptableShipStatuses:indexof(shipToCheck:status) = -1).
 	}
 
 //returns whether or not the player is trying to take over manual control by pressing WASDQE
