@@ -204,21 +204,13 @@ function Main{
 		//circularize
 		else if launchPhases[currLaunchPhaseIndex] = "circularize"{ 
 			UNLOCK STEERING.
-
-			//now it should be time to make the circularization burn
-
-			//lets recompute the burn time incase the atmosphere slowed us down.
-			set circularizationBurnDeltaV to calculateApoapsisCircularizationDeltaV(ship:orbit).
-			set circularizationBurnDuration to calculateEngineBurnTime(circularizationBurnDeltaV).
-
-			//at what time stamp should we stop firing the engines?
-			declare local circularizationBurnEndTimestamp to time+circularizationBurnDuration.
-			local lock timeRemainingUntilEndOfCircularizationBurn to time:seconds - circularizationBurnEndTimestamp:seconds.
+			//how do we know if we're "done" with the Circularization Burn? when we raise our periapsis to match our initial apoapsis.
+			declare local initialApoapsis to ship:orbit:apoapsis.
 
 			print("Starting Circularization Burn.").
 			//full throttle.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
-			until (0<timeRemainingUntilEndOfCircularizationBurn){
+			until (ship:orbit:periapsis >= initialApoapsis){
 				//check staging
 				autoStage().
 				//check if steering should be unlocked
