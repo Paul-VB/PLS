@@ -56,7 +56,8 @@ function Main{
 	launchPhases:add("clearTheTower").
 	launchPhases:add("rollProgram").
 	launchPhases:add("mainAscent").
-	launchPhases:add("coastAndCircularize").
+	launchPhases:add("coastToApoapsis").
+	launchPhases:add("circularize").
 	launchPhases:add("done").
 
 	//should we warp to the launch window?
@@ -83,7 +84,7 @@ function Main{
 			wait timeStep.
 		}
 	}
-	
+
 	//things that must happen immediately upon launch
 	//turn SAS off. There is a known bug in KOS with SAS and cooked controls
 	SAS off.
@@ -164,8 +165,8 @@ function Main{
 			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
 		}
 
-		//coast to apoapsis and Circularize
-		else if launchPhases[currLaunchPhaseIndex] = "coastAndCircularize"{
+		//coast to apoapsis
+		else if launchPhases[currLaunchPhaseIndex] = "coastToApoapsis"{
 			//set throttle to 0.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 			//we need to unlock steering before we begin coasting. Steering may have been locked by a previous launch phase.
@@ -175,12 +176,8 @@ function Main{
 			lock steering to prograde.
 
 			//now lets figure out the circularization burn.
-			//How much deltaV will we need to expend?
-			declare local circularizationBurnDeltaV to calculateApoapsisCircularizationDeltaV(ship:orbit).
-			//how long will the engine burn be?
-			declare local circularizationBurnDuration to calculateEngineBurnTime(circularizationBurnDeltaV).
 			//we want to center the burn at apoapsis. how far in the future will we need to start the burn?
-			declare local circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (circularizationBurnDuration*0.5)).
+			local lock circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (calculateEngineBurnTime(calculateApoapsisCircularizationDeltaV(ship:orbit))*0.5)).
 			local lock timeRemainingUntilCircularizationBurn to time:seconds - circularizationBurnStartTimestamp:seconds.
 
 
@@ -201,6 +198,13 @@ function Main{
 			}
 			UNLOCK STEERING.
 			print("Coasting complete.").
+			set currLaunchPhaseIndex to currLaunchPhaseIndex +1.
+		}
+
+		//circularize
+		else if launchPhases[currLaunchPhaseIndex] = "circularize"{ 
+			UNLOCK STEERING.
+
 			//now it should be time to make the circularization burn
 
 			//lets recompute the burn time incase the atmosphere slowed us down.
