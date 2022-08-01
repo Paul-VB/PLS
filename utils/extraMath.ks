@@ -27,3 +27,17 @@ function toStringSigned{
 	}
 	return result.
 }
+
+//given a list of numbers, return an equal-length list of numbers, but where each number is the cumulative sum of all the numbers before it
+//example input = [1,2,3,4,5]
+//example output = [1,3,6,10,15]
+function cumulativeSum{
+	parameter theList.
+	declare local returnList to theList:copy().
+
+	//iterate over each index in the returnList
+	FROM {local currIndex is 1.} UNTIL (currIndex = returnList:length) STEP {set currIndex to currIndex+1.} DO {
+		set returnList[currIndex] to returnList[currIndex] + returnList[currIndex-1].
+	}
+	return returnList.
+}
