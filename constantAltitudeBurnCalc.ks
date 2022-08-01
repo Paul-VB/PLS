@@ -33,7 +33,7 @@ function calculateConstantAltitudeBurnPitch{
 	declare local downwardsForce to theShip:mass * downwardsAcceleration.
 
 	//now lets do a bit of trig to find out what pitch angle we need.
-	declare local pitchAngle to arcSin(downwardsForce/theShip:maxthrust).
+	declare local pitchAngle to arcSin(downwardsForce/theShip:availablethrust).
 
 	return pitchAngle.
 }
