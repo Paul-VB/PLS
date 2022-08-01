@@ -10,6 +10,7 @@ runOncePath(basePath+"azCalc.ks").
 runOncePath(basePath+"ApoLaunchPitchProgram.ks",(13)).
 runOncePath(basePath+"engineBurnTimeCalc.ks").
 runOncePath(basePath+"launchWindowCalc.ks").
+runOncePath(basePath+"constantAltitudeBurnCalc.ks").
 runOncePath(basePath+"utils/autoStage.ks").
 runOncePath(basePath+"gui/parkingOrbit.ks").
 runOncePath(basePath+"gui/guiSkin.ks").
