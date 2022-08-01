@@ -1,8 +1,8 @@
 @lazyGlobal off.
 
-//given a deltaV target, how long will it take this ship - with it's current stages and fuel - to burn the engines to get that amount of deltaV
+//given a deltaV target, how long will it take a ship - with it's current stages and fuel - to burn the engines to get that amount of deltaV
 function calculateEngineBurnTime{
-	parameter targetDeltaV.
+	parameter targetDeltaV, theShip to ship.
 	
 	declare local burnTimeTotal to 0.
 
@@ -20,41 +20,59 @@ function calculateEngineBurnTime{
 
 	//get the delta V for each stage
 	FROM {local currStageIndex is numberOfStages.} UNTIL (currStageIndex = -1 or deltaVRemaining <= 0) STEP {set currStageIndex to currStageIndex-1.} DO {
-		//is the current stage enough to finish off our deltaVremaining?
-		declare local currentStageDeltaV to ship:stagedeltav(currStageIndex):vacuum.
-		if (currentStageDeltaV > deltaVRemaining){
-			//if we get here, we know that we'll only need to use PART of the current stage. exactly how much..? MATH
-			//get a list of all engines in this stage
-			declare local engines to getAllEnginesByStageNumber(currStageIndex).
+		//How much deltaV does the current stage have to expend?
+		declare local currentStageDeltaVMax to theShip:stagedeltav(currStageIndex):vacuum.
 
-			//get the average ISP vac of this stage
-			declare local averageVacISP to averageVacISPMultipleEngines(engines).
+		//how much deltaV does the current stage *need* to expend?
+		//If the current stage enough to finish off our deltaVRemaining, then we just need to spend deltaVRemaining.
+		//otherwise, we need to use this whole stage
+		declare local currentStageDeltaVRequirement to min(currentStageDeltaVMax,deltaVRemaining).
 
-			//get the iniital mass of this stage
-			declare local massInital to cumulativeStageMasses[currStageIndex].
+		declare local averageVacISP to 0.
+		declare local massInital to 0.
+		declare local massFinal to 0.
 
-			//knowing how much DeltaV we have left to achieve, we can use some fun math to compute the weight of the fuel we need to burn
-			//this insane formula is derived from the ideal rocket equasion.
-			declare local massFinal to massInital/(constant:e^(deltaVRemaining/(averageVacISP*constant:g0))).
-			declare local weightOfFuelBurned to massInital-massFinal.
 
-			//we also need the sum of all the mass flows of the engines in this stage
-			declare local sumOfMassFlows to 0.
-			for engine in engines{
-				set sumOfMassFlows to sumOfMassFlows + engine:maxmassflow.
+		//how long will this stage burn for at max thrust?
+		declare local stageBurnTime to 0.{
+			//We only need to calculate the burn time for stages that actually have deltaV
+			if currentStageDeltaVMax > 0 {
+
+
+				//get a list of all engines in this stage
+				declare local engines to getAllEnginesByStageNumber(currStageIndex).
+
+				//get the average ISP vac of this stage
+				set averageVacISP to averageVacISPMultipleEngines(engines).
+
+				//get the initital mass of this stage
+				set massInital to cumulativeStageMasses[currStageIndex].
+
+				//knowing how much DeltaV we have left to achieve, we can use some fun math to compute the weight of the fuel we need to burn
+				//this insane formula is derived from the ideal rocket equation.
+				set massFinal to massInital/(constant:e^(currentStageDeltaVRequirement/(averageVacISP*constant:g0))).
+				declare local weightOfFuelBurned to massInital-massFinal.
+
+				//we also need the sum of all the mass flows of the engines in this stage
+				declare local sumOfMassFlows to 0.
+				for engine in engines{
+					set sumOfMassFlows to sumOfMassFlows + engine:maxmassflow.
+				}
+
+				//now that we know how much fuel will be burned, we can take the sum of the fuel burn rates of all engines in this stage and get the time it takes to burn that fuel
+				set stageBurnTime to weightOfFuelBurned/sumOfMassFlows.
 			}
-
-			//now that we know how much fuel will be burned, we can take the sum of the fuel burn rates of all engines in this stage and get the time it takes to burn that fuel
-			declare local stageBurnTime to weightOfFuelBurned/sumOfMassFlows.
-
-			//and add that time to our total
-			set burnTimeTotal to burnTimeTotal + stageBurnTime.
-
-		} else {
-			//we know we'll need to use this whole stage.
-			set burnTimeTotal to burnTimeTotal + ship:stagedeltav(currStageIndex):duration.	
 		}
-		set deltaVRemaining to deltaVRemaining - currentStageDeltaV.
+
+		//add that time to our total
+		set burnTimeTotal to burnTimeTotal + stageBurnTime.
+
+		//now subtract the deltaV that this stage will expend from deltaVRemaining
+		set deltaVRemaining to deltaVRemaining - currentStageDeltaVRequirement.
+
+		declare local lineToStartPrinting to 36.
+		declare local currLineToPrint to lineToStartPrinting+currStageIndex.
+		//print("for stage number: "+currStageIndex+",engine ISP = "+round(averageVacISP,1):toString+" InitialMass = "+round(massInital,1):toString+", finalMass = "+round(massFinal,1):toString+", DeltaV(built in) = "+round(theShip:stageDeltaV(currStageIndex):vacuum,0):toString+" BurnTime = "+round(stageBurnTime,2):toString+"s. ") at (0,currLineToPrint).
 	}
 	return burnTimeTotal.
 }
@@ -116,3 +134,92 @@ function calculateStageMassesCumulatively{
 	}
 	return masses.
 }
+
+// //given a list of parts, return all the engines in that list
+// function getAllEnginesInListOfParts{
+// 	parameter parts.
+
+// 	declare local engines to list().
+// 	for part in parts{
+// 		if (part:hassuffix("thrust")){
+// 			engines:add(part).
+// 		}
+// 	}
+// 	return engines.
+// }
+
+// //given a list of parts, returns all the parts that contain 
+
+// //given a list of parts, return the sum of their current masses
+// function sumOfMasses{
+// 	parameter parts.
+// 	declare local result to 0.
+// 	for part in parts{
+// 		set result to result + part:mass.
+// 	}
+// 	return result.
+
+// }
+
+// //given a list of parts, return the sum of their empty (without fuel) masses
+// function sumOfDryMasses{
+// 	parameter parts.
+// 	declare local result to 0.
+// 	for part in parts{
+// 		set result to result + part:dryMass.
+// 	}
+// 	return result.
+// }
+
+// //returns a lexicon of all the parts in a ship.
+// //the key of the lexicon being the stage number that part is associated with.
+// //the value is a list of parts in that stage
+// function getLexiconOfPartsByStageNumber{
+// 	parameter theShip to ship.
+
+// 	declare local partsLexicon to initializeLexiconOfEmptyListsByStageNumber(theShip).
+
+// 	//loop over every part in the ship and add it to it's
+// 	for part in theShip:parts{
+// 		declare local currPartStage to part:stage+1.//we add 1 here because the stage numbering is dum
+// 		if not partsLexicon:haskey(currPartStage){
+// 			partsLexicon:add(currPartStage,list()).
+// 		}
+// 		partsLexicon[currPartStage]:add(part).
+// 	}
+// 	return partsLexicon.	
+// }
+
+// //given a lexicon of parts by stage number, returns a lexicon of equal length that holds the mass of each stage
+// function getLexiconOfPartMassesByStageNumber{
+// 	parameter partsLexicon.
+
+// 	declare local masses to lexicon().
+// 	//loop over the stage in the lexicon of parts and sum the masses of those parts.
+// 	for currStageKey in partsLexicon:keys{
+// 		masses:add(currStageKey,list()).
+// 		set masses[currStageKey] to sumOfMasses(partsLexicon[currStageKey]).
+// 	}
+// 	return masses.
+// }
+
+// //returns a lexicon of stage numbers and lists.
+// //the keys are the numbers of all the stages in a ship.
+// //the values are just empty lists. 
+// //these lists are meant to hold different types of parts in a ship (i.e. engines, fuel tanks, all parts in general, etc.)
+// //this design pattern (a lexicon of parts by stage number) is only here to increase performance. 
+// //Looping over every single part in a ship to is computationally expensive, so the idea is to just loop over the parts once and cache the result.
+// function initializeLexiconOfEmptyListsByStageNumber{
+// 	parameter theShip to ship.
+
+// 	declare local partsLexicon to lexicon().
+
+// 	//get the number of stages remaining
+// 	declare local numberOfStages to theShip:stageNum.
+
+// 	//initialize the lexicon's keys
+// 	FROM {local currStageIndex is numberOfStages.} UNTIL (currStageIndex) STEP {set currStageIndex to currStageIndex-1.} DO {
+// 		partsLexicon:add(currStageIndex,list()).
+// 	}
+// 	return partsLexicon.
+// }
