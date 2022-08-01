@@ -14,7 +14,17 @@ function calculateConstantAltitudeBurnPitch{
 	declare local gravitationalAcceleration to theShip:body:mu/(radius^2).
 
 	//what is the apparent acceleration due to the centrifugal force at it's current orbital location
-	declare local centrifugalAcceleration to ((getHorizontalOrbitalVector(theShip):mag/radius)^2)*radius.
+	//the equation for centrifugal Acceleration is: CentrifugalAcceleration = (angularVelocity^2)*radius
+	//the equation for angularVelocity is: angularVelocity = HorizontalVelocity/radius
+	//pluging in all those values, we get a long-form equation for centrifugal Acceleration of:
+	//CentrifugalAcceleration = ((HorizontalVelocity/radius)^2)*radius
+	//this expands out to:
+	//CentrifugalAcceleration = (HorizontalVelocity/radius)*(HorizontalVelocity/radius)*radius
+	//but at the end, those two radiuses cancel out, so we can simply that into:
+	//CentrifugalAcceleration = (HorizontalVelocity/radius)*HorizontalVelocity
+	//which then can be simplified further into
+	//CentrifugalAcceleration = HorizontalVelocity^2/radius
+	declare local centrifugalAcceleration to getHorizontalOrbitalVector(theShip):mag^2/radius.
 
 	//what is the apparent acceleration of those two combined? 
 	declare local downwardsAcceleration to gravitationalAcceleration - centrifugalAcceleration.
