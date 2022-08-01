@@ -46,6 +46,7 @@ function Main{
 	//next, lets get the height of the launch tower (the tallest launch clamp)
 	declare local towerHeight to getLaunchTowerMaxHeight().
 
+	print("-").
 	print("Parking Orbit Summary: ").
 	print("Parking Orbit Altitude: "+parkingOrbit:periapsis).
 	print("Parking Orbit Inclination: "+parkingOrbit:inclination).
@@ -158,6 +159,7 @@ function Main{
 					if (not steeringManager:enabled){
 						lock steering to heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).
 					}
+					print ("Autopilot active.") at (0,0).
 				}
 			}
 			UNLOCK STEERING.
@@ -177,12 +179,16 @@ function Main{
 
 			//now lets figure out the circularization burn.
 			//we want to center the burn at apoapsis. how far in the future will we need to start the burn?
-			local lock circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (calculateEngineBurnTime(calculateApoapsisCircularizationDeltaV(ship:orbit))*0.5)).
+			//these are 'locks' because they are to be continually recomputed.
+			local lock circularizationBurnDuration to calculateEngineBurnTime(calculateApoapsisCircularizationDeltaV(ship:orbit)).
+			local lock circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (circularizationBurnDuration*0.5)).
 			local lock timeRemainingUntilCircularizationBurn to time:seconds - circularizationBurnStartTimestamp:seconds.
 
 
 			//keep coasting until it is time to make the circularization burn
 			until (0<timeRemainingUntilCircularizationBurn){
+				print ("circularization Burn Duration: "+round(circularizationBurnDuration,2):toString) at (0,26).
+				print ("time Remaining until Circularization: "+round(timeRemainingUntilCircularizationBurn,2):toString) at (0,27).
 				//check if steering should be unlocked
 				if (SAS or isPlayerTryingToSteer()){
 					//the player can turn on SAS at any time to disengage the autopilot
@@ -194,7 +200,9 @@ function Main{
 					if (not steeringManager:enabled){
 						lock steering to prograde.
 					}
+					print ("Autopilot active.") at (0,0).
 				}
+				//wait 1.
 			}
 			UNLOCK STEERING.
 			print("Coasting complete.").
@@ -204,13 +212,12 @@ function Main{
 		//circularize
 		else if launchPhases[currLaunchPhaseIndex] = "circularize"{ 
 			UNLOCK STEERING.
-			//how do we know if we're "done" with the Circularization Burn? when we raise our periapsis to match our initial apoapsis.
-			declare local initialApoapsis to ship:orbit:apoapsis.
-
+			
 			print("Starting Circularization Burn.").
 			//full throttle.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 1.
-			until (ship:orbit:periapsis >= initialApoapsis){
+			//how do we know if we're "done" with the Circularization Burn? when our periapsis whips around and changes places with the apoapsis
+			until (ship:orbit:trueanomaly<=90 or 270<=ship:orbit:trueanomaly){
 				//check staging
 				autoStage().
 				//check if steering should be unlocked
@@ -222,8 +229,10 @@ function Main{
 				} else {
 					//we know we should be steering. Next check if we currently *are* steering
 					if (not steeringManager:enabled){
-						lock steering to heading(calculateCurrentProgradeCompassHeading(),0).
+						lock steering to prograde.
+						//lock steering to heading(calculateCurrentProgradeCompassHeading(),0).
 					}
+					print ("Autopilot active.") at (0,0).
 				}
 			}
 			//set throttle to 0.
