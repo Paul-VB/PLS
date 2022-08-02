@@ -43,7 +43,7 @@ function calculateConstantAltitudeBurnPitch{
 	}
 
 	//now lets do a bit of trig to find out what pitch angle we need.
-	set pitchAngle to arcSin(downwardsForce/theShip:availablethrust).
+	set pitchAngle to arcSin(clamp(downwardsForce/theShip:availablethrust,-1,1)).
 
 	return pitchAngle.
 }
