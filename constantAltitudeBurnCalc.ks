@@ -45,5 +45,10 @@ function calculateConstantAltitudeBurnPitch{
 	//now lets do a bit of trig to find out what pitch angle we need.
 	set pitchAngle to arcSin(clamp(downwardsForce/theShip:availablethrust,-1,1)).
 
+	//now lets constrain the pitch angle to a safe value.
+	declare local minPitchAngle to 0.
+	declare local maxPitchAngle to 84.9.
+	set pitchAngle to clamp(pitchAngle,minPitchAngle,maxPitchAngle).
+
 	return pitchAngle.
 }
