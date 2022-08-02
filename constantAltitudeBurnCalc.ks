@@ -25,7 +25,7 @@ function calculateConstantAltitudeBurnPitch{
 	//CentrifugalAcceleration = (HorizontalVelocity/radius)*HorizontalVelocity
 	//which then can be simplified further into
 	//CentrifugalAcceleration = HorizontalVelocity^2/radius
-	declare local centrifugalAcceleration to getHorizontalOrbitalVector(theShip):mag^2/radius.
+	declare local centrifugalAcceleration to getHorizontalOrbitalVector(theShip):sqrMagnitude/radius.
 
 	//what is the apparent acceleration of those two combined? 
 	declare local downwardsAcceleration to gravitationalAcceleration - centrifugalAcceleration.
