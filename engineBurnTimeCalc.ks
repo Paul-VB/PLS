@@ -69,10 +69,6 @@ function calculateEngineBurnTime{
 
 		//now subtract the deltaV that this stage will expend from deltaVRemaining
 		set deltaVRemaining to deltaVRemaining - currentStageDeltaVRequirement.
-
-		declare local lineToStartPrinting to 36.
-		declare local currLineToPrint to lineToStartPrinting+currStageIndex.
-		//print("for stage number: "+currStageIndex+",engine ISP = "+round(averageVacISP,1):toString+" InitialMass = "+round(massInital,1):toString+", finalMass = "+round(massFinal,1):toString+", DeltaV(built in) = "+round(theShip:stageDeltaV(currStageIndex):vacuum,0):toString+" BurnTime = "+round(stageBurnTime,2):toString+"s. ") at (0,currLineToPrint).
 	}
 	return burnTimeTotal.
 }
