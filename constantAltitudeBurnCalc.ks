@@ -1,6 +1,7 @@
 //@lazyGlobal off.
 
-//#include "utils/orbitTools.ks"
+//#include "utils/shipTools.ks"
+//#include "utils/extraMath.ks"
 
 //given a ship - at it's current location in its (sub)orbital flight -  what pitch is required
 //to maintain a constant altitude at maximum engine thrust?
@@ -32,8 +33,17 @@ function calculateConstantAltitudeBurnPitch{
 	//what is the combined uppy-downy force on the ship?
 	declare local downwardsForce to theShip:mass * downwardsAcceleration.
 
+	declare local pitchAngle to 0.
+	if theShip:availablethrust > 0 {
+
+	} else {
+		//if there is no thrust, that probably means we are between stages and the autoStage function hasn't quite gotten a chance to run.
+		//if this is the case, we should probably just hold the pitch where it is.
+		set pitchAngle to getCurrentPitchAngle().
+	}
+
 	//now lets do a bit of trig to find out what pitch angle we need.
-	declare local pitchAngle to arcSin(downwardsForce/theShip:availablethrust).
+	set pitchAngle to arcSin(downwardsForce/theShip:availablethrust).
 
 	return pitchAngle.
 }

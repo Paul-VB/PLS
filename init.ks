@@ -17,3 +17,4 @@ runOncePath(basePath+"gui/guiSkin.ks").
 runOncePath(basePath+"gui/hudStuff.ks").
 runOncePath(basePath+"gui/warpPrompt.ks").
 runOncePath(basePath+"utils/extraMath.ks").
+runOncePath(basePath+"utils/shipTools.ks").
