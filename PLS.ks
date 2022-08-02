@@ -166,20 +166,16 @@ function Main{
 			//coast prograde
 			lock steering to prograde.
 
-			//now lets figure out the circularization burn.
-			//we want to center the burn at apoapsis. how far in the future will we need to start the burn?
-			//these are 'locks' because they are to be continually recomputed.
+			//now lets figure out the circularization burn. 
+			//technically this variable isn't really needed anymore, but i'll keep it cuz its fun to see the estimated burn duration
+			//this is a 'lock' because it is to be continually recomputed.
 			local lock circularizationBurnDuration to calculateEngineBurnTime(calculateApoapsisCircularizationDeltaV(ship:orbit)).
-			local lock circularizationBurnStartTimestamp to time+(ship:orbit:eta:apoapsis - (circularizationBurnDuration*0.5)).
-			local lock timeRemainingUntilCircularizationBurn to time:seconds - circularizationBurnStartTimestamp:seconds.
 
-
-			//keep coasting until it is time to make the circularization burn
-			until (0<timeRemainingUntilCircularizationBurn){
+			//keep coasting until we pass apoapsis
+			until (180<=ship:orbit:trueanomaly and ship:orbit:trueanomaly < 360){
 				print ("circularization Burn Duration: "+round(circularizationBurnDuration,2):toString) at (0,26).
-				print ("time Remaining until Circularization: "+round(timeRemainingUntilCircularizationBurn,2):toString) at (0,27).
+				print ("time Remaining until Circularization: "+round(ship:orbit:eta:apoapsis,2):toString) at (0,27).
 				lockSteeringToWithManualOverride({return prograde.}).
-				//wait 1.
 			}
 			UNLOCK STEERING.
 			print("Coasting complete.").
