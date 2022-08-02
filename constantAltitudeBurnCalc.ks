@@ -43,7 +43,8 @@ function calculateConstantAltitudeBurnPitch{
 	}
 
 	//now lets do a bit of trig to find out what pitch angle we need.
-	set pitchAngle to arcSin(clamp(downwardsForce/theShip:availablethrust,-1,1)).
+	declare local dfOverAvailThrust to downwardsForce/theShip:availablethrust.
+	set pitchAngle to arcSin(clamp(dfOverAvailThrust,-1,1)).
 
 	//now lets constrain the pitch angle to a safe value.
 	declare local minPitchAngle to 0.
