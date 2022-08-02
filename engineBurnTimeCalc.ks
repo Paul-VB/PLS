@@ -60,7 +60,12 @@ function calculateEngineBurnTime{
 				}
 
 				//now that we know how much fuel will be burned, we can take the sum of the fuel burn rates of all engines in this stage and get the time it takes to burn that fuel
-				set stageBurnTime to weightOfFuelBurned/sumOfMassFlows.
+				if sumOfMassFlows > 0{
+					//this is here to prevent divide by zero errors.
+					set stageBurnTime to weightOfFuelBurned/sumOfMassFlows.
+				} else {
+					set stageBurnTime to 0.
+				}
 			}
 		}
 
