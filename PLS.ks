@@ -6,6 +6,7 @@ clearScreen.
 // #include "ApoLaunchPitchProgram.ks"
 // #include "azCalc.ks"
 // #include "launchWindowCalc.ks"
+// #include "constantAltitudeBurnCalc.ks"
 // #include "gui/parkingOrbit.ks"
 // #include "gui/hudStuff.ks"
 // #include "gui/warpPrompt.ks"
@@ -148,19 +149,7 @@ function Main{
 			until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
 				//check staging
 				autoStage().
-				//check if steering should be unlocked
-				if (SAS or isPlayerTryingToSteer()){
-					//the player can turn on SAS at any time to disengage the autopilot
-					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
-					UNLOCK STEERING.
-					UNLOCK THROTTLE.
-				} else {
-					//we know we should be steering. Next check if we currently *are* steering
-					if (not steeringManager:enabled){
-						lock steering to heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).
-					}
-					print ("Autopilot active.") at (0,0).
-				}
+				lockSteeringToWithManualOverride(heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit))).
 			}
 			UNLOCK STEERING.
 			print("Main Ascent complete.").	
@@ -189,19 +178,7 @@ function Main{
 			until (0<timeRemainingUntilCircularizationBurn){
 				print ("circularization Burn Duration: "+round(circularizationBurnDuration,2):toString) at (0,26).
 				print ("time Remaining until Circularization: "+round(timeRemainingUntilCircularizationBurn,2):toString) at (0,27).
-				//check if steering should be unlocked
-				if (SAS or isPlayerTryingToSteer()){
-					//the player can turn on SAS at any time to disengage the autopilot
-					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
-					UNLOCK STEERING.
-					UNLOCK THROTTLE.
-				} else {
-					//we know we should be steering. Next check if we currently *are* steering
-					if (not steeringManager:enabled){
-						lock steering to prograde.
-					}
-					print ("Autopilot active.") at (0,0).
-				}
+				lockSteeringToWithManualOverride(prograde).
 				//wait 1.
 			}
 			UNLOCK STEERING.
@@ -220,20 +197,7 @@ function Main{
 			until (ship:orbit:trueanomaly<=90 or 270<=ship:orbit:trueanomaly){
 				//check staging
 				autoStage().
-				//check if steering should be unlocked
-				if (SAS or isPlayerTryingToSteer()){
-					//the player can turn on SAS at any time to disengage the autopilot
-					print("WARNING!! SAS mode is on, or player is trying to manually steer. autopilot disengaged") at (0,0).
-					UNLOCK STEERING.
-					UNLOCK THROTTLE.
-				} else {
-					//we know we should be steering. Next check if we currently *are* steering
-					if (not steeringManager:enabled){
-						lock steering to prograde.
-						//lock steering to heading(calculateCurrentProgradeCompassHeading(),0).
-					}
-					print ("Autopilot active.") at (0,0).
-				}
+				lockSteeringToWithManualOverride(heading(calculateCurrentProgradeCompassHeading(),calculateConstantAltitudeBurnPitch())).
 			}
 			//set throttle to 0.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
@@ -247,45 +211,10 @@ function Main{
 }
 
 //the mighty apo turn! used to calculate pitch
+//this is separated out to make it a little easier to switch pitch algorithms.
 function calculateCurrentRequiredPitchAngle{
 	parameter targetOrbit.
 	return calculatePitchAngle(targetOrbit).
-
-}
-function isShipLanded{
-	parameter shipToCheck is ship.
-	declare local listOfAcceptableShipStatuses to list("PRELAUNCH","LANDED").
-	return not(listOfAcceptableShipStatuses:indexof(shipToCheck:status) = -1).
-	}
-
-//returns whether or not the player is trying to take over manual control by pressing WASDQE
-//Does not check the throttle position at all.
-function isPlayerTryingToSteer{
-	return SHIP:CONTROL:PILOTROTATION <> v(0,0,0).
-}
-
-//this function returns the height of the tallest launch clamp. 
-//this is useful to know when we have cleared all launch clamps, and can begin the roll program safely.
-//If there are no launch clamps, then 0 is returned.
-function getLaunchTowerMaxHeight{
-	declare local maxLaunchClampHeight to 0.
-	//a list of all known launch clamp names to look for
-	declare local ListOfKnownLaunchClampNames to list("TT18-A Launch Stability Enhancer").
-
-	//loop over each part on the ship
-	for currPart in ship:parts{
-
-		//if we find a launch clamp...
-		if (ListOfKnownLaunchClampNames:indexof(currPart:title) <> -1){
-			//...find the height of that launch clamp.
-			declare local PartBounds to currPart:bounds.
-			declare local currLaunchClampHeight to PartBounds:size:mag.
-
-			//and set the maxLaunchClampHeight
-			set maxLaunchClampHeight to max(maxLaunchClampHeight,currLaunchClampHeight).
-		}
-	}
-	return maxLaunchClampHeight.
 }
 
 
