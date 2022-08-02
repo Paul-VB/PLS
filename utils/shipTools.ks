@@ -21,8 +21,9 @@ function getCurrentPitchAngle{
 //this function is meant to be run in a loop. 
 //It is similar to 'lock steering to ...', but the difference here is that
 //it allows the player to take over manual control at any point
+//the parameter steeringDirectionDelegate MUST be a delegate/anonymous function that returns a direction object
 function lockSteeringToWithManualOverride{
-	parameter steeringDirection.
+	parameter steeringDirectionDelegate.
 	//check if steering should be unlocked
 	if (SAS){
 		//the player can turn on SAS at any time to disengage the autopilot
@@ -39,7 +40,7 @@ function lockSteeringToWithManualOverride{
 	else {
 		//we know we should be steering. Next check if we currently *are* steering
 		if (not steeringManager:enabled){
-			lock steering to steeringDirection.
+			lock steering to steeringDirectionDelegate:call().
 		}
 		print("Autopilot active.                                          ") at (0,0).
 	}

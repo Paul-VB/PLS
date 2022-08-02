@@ -149,7 +149,7 @@ function Main{
 			until (ship:orbit:apoapsis >= parkingOrbit:apoapsis){
 				//check staging
 				autoStage().
-				lockSteeringToWithManualOverride(heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit))).
+				lockSteeringToWithManualOverride({return heading(calculateThrustHeading(parkingOrbit,calculateSpeedRequiredForApoapsis(parkingOrbit:apoapsis)),calculateCurrentRequiredPitchAngle(parkingOrbit)).}).
 			}
 			UNLOCK STEERING.
 			print("Main Ascent complete.").	
@@ -178,7 +178,7 @@ function Main{
 			until (0<timeRemainingUntilCircularizationBurn){
 				print ("circularization Burn Duration: "+round(circularizationBurnDuration,2):toString) at (0,26).
 				print ("time Remaining until Circularization: "+round(timeRemainingUntilCircularizationBurn,2):toString) at (0,27).
-				lockSteeringToWithManualOverride(prograde).
+				lockSteeringToWithManualOverride({return prograde.}).
 				//wait 1.
 			}
 			UNLOCK STEERING.
@@ -197,7 +197,7 @@ function Main{
 			until (ship:orbit:trueanomaly<=90 or 270<=ship:orbit:trueanomaly){
 				//check staging
 				autoStage().
-				lockSteeringToWithManualOverride(heading(calculateCurrentProgradeCompassHeading(),calculateConstantAltitudeBurnPitch())).
+				lockSteeringToWithManualOverride({return heading(calculateCurrentProgradeCompassHeading(),calculateConstantAltitudeBurnPitch()).}).
 			}
 			//set throttle to 0.
 			SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
