@@ -35,16 +35,14 @@ function calculateConstantAltitudeBurnPitch{
 
 	declare local pitchAngle to 0.
 	if theShip:availablethrust > 0 {
-
+		//now lets do a bit of trig to find out what pitch angle we need.
+		declare local dfOverAvailThrust to downwardsForce/theShip:availablethrust.
+		set pitchAngle to arcSin(clamp(dfOverAvailThrust,-1,1)).
 	} else {
 		//if there is no thrust, that probably means we are between stages and the autoStage function hasn't quite gotten a chance to run.
 		//if this is the case, we should probably just hold the pitch where it is.
 		set pitchAngle to getCurrentPitchAngle().
 	}
-
-	//now lets do a bit of trig to find out what pitch angle we need.
-	declare local dfOverAvailThrust to downwardsForce/theShip:availablethrust.
-	set pitchAngle to arcSin(clamp(dfOverAvailThrust,-1,1)).
 
 	//now lets constrain the pitch angle to a safe value.
 	declare local minPitchAngle to 0.
