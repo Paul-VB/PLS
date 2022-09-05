@@ -63,28 +63,8 @@ function Main{
 	launchPhases:add("done").
 
 	//should we warp to the launch window?
-	if confirmWarpToLaunchWindow(){
-		//how long we want the countdown to be
-		declare local countdownTime to 10.
-
-		//how much leeway (in seconds) we want to have for checking if now is a launch window
-		declare local launchWindowLeeway to 1.
-
-		//are we close to the launch window time?
-		local lock timeRemainingUntilLaunch to time:seconds - nextLaunchWindowTimestamp:seconds.
-		
-		//now we just need to wait until the next launch window, or dont wait if we're already in the air
-		warpTo(nextLaunchWindowTimestamp:seconds - countdownTime).
-		hudPrint0("Warping to launch time: "+timestamp(nextLaunchWindowTimestamp:seconds - countdownTime):full, countdownTime).
-		until(timeRemainingUntilLaunch*-1 <= countdownTime or not isShipLanded()){
-			wait 1.
-		}
-		//count down until liftoff, or dont if we're already in the air
-		declare local timeStep to 1.
-		until((0<timeRemainingUntilLaunch and timeRemainingUntilLaunch < launchWindowLeeway)or not isShipLanded()){
-			hudPrint0("T"+round(timeRemainingUntilLaunch,0),timeStep).
-			wait timeStep.
-		}
+	if confirmWarpToLaunchWindow() and isShipLanded() {
+		warpToWithCountdown(nextLaunchWindowTimestamp,"Warping to launch time: ",10).
 	}
 
 	//things that must happen immediately upon launch

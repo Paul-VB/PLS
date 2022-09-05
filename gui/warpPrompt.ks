@@ -43,3 +43,27 @@ function selectNo{
 	set answer to false.
 	set finished to true.
 }
+
+//warps to a given time stamp with an on-screen gui countdown and message
+function warpToWithCountdown{
+	parameter targetTimeStamp, message, countdownDuration to 10.
+
+	//how much leeway (in seconds) we want to have for checking if now is the target time stamp
+	declare local timeStampCheckLeeway to 1.
+
+	//how close are we to target time?
+	local lock timeRemaining to time:seconds - targetTimeStamp:seconds.
+	
+	//now we just need to wait until the target time stamp
+	warpTo(targetTimeStamp:seconds - countdownDuration).
+	hudPrint0(message+timestamp(targetTimeStamp:seconds - countdownDuration):full, countdownDuration).
+	until(timeRemaining*-1 <= countdownDuration){
+		wait 1.
+	}
+	//count down 
+	declare local timeStep to 1.
+	until(0<timeRemaining and timeRemaining < timeStampCheckLeeway){
+		hudPrint0("T"+round(timeRemaining,0),timeStep).
+		wait timeStep.
+	}
+}
